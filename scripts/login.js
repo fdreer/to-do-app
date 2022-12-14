@@ -13,20 +13,17 @@ window.addEventListener('load', ()=>{
         realizarLogin({email:inputEmail.value, password:inputPassword.value});
     })
 
-    function realizarLogin(data) {
+    async function realizarLogin(data) {
 
-        // const res = await fetchPost({body:data, direccion:'users/login'});
-        ajax({
+        const json = await ajax({
             method:'POST',
             url: API.loginUser,
-            cbSuccess:(res)=>{
-
-                if (res.jwt) {
-                    localStorage.setItem('jwt', res.jwt);
-                    location.replace('mis-tareas.html');
-                }
-            },
             body: data
         })
+
+        if (json.jwt) {
+            localStorage.setItem('jwt', json.jwt);
+            location.replace('mis-tareas.html');
+        }
     }
 })
