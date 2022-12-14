@@ -1,5 +1,8 @@
+import ajax from "./helpers/ajax.js";
+import API from "./helpers/API.js"
+
 window.addEventListener('load', function () {
-    /* ---------------------- obtenemos variables globales ---------------------- */
+
     const form = document.querySelector('form');
     const inputNombre = document.querySelector('#inputNombre');
     const inputApellido = document.querySelector('#inputApellido');
@@ -24,47 +27,29 @@ window.addEventListener('load', function () {
         const data = obtenerDatosFormSignup();
         const validaciones = validacionDeInputs(data);
 
-        // console.log(validaciones.firstNameVerification);
-        // console.log(validaciones.lastNameVerification);
-        // console.log(validaciones.emailVerification);
-        // console.log(validaciones.passwordVerification);
-
-
         if (validaciones) {
             realizarRegister(data);
             console.log('Se registra');
         } else{
             console.log('Rellenar todos los campos');
-        }
-
-        
+        }   
     });
 
-    async function realizarRegister(data) {
+    function realizarRegister(data) {
 
-        const options = {
-            method: "POST",
-            headers: {
-                "Content-type":"application/json"
+        // const usuarioCreado = await fetchPost(data, 'users');
+        ajax({
+            method:"POST",
+            url: API.createUser,
+            cbSuccess: (res)=>{
+
+                if(res.jwt){
+                    localStorage.setItem('jwt', res.jwt);
+                    location.replace('mis-tareas.html');
+                }
             },
-            body: JSON.stringify(data),
-        }
-
-        try {
-
-            const res = await fetch('http://todo-api.ctd.academy:3000/v1/users', options);
-            const json = await res.json();
-
-            console.log(res);
-            console.log(json);
-            console.log(json.jwt);
-            if( json.jwt){
-                localStorage.setItem('jwt', json.jwt);
-                location.replace('mis-tareas.html');
-            }
-        } catch (err) {
-            console.log(err);
-        }
+            body: data
+        })
     }
 
     /* -------------------------------------------------------------------------- */
@@ -116,15 +101,6 @@ window.addEventListener('load', function () {
     function validacionDeInputs(data) {
         
         const {firstName, lastName, email, password} = data;
-
-        // const dataVerification = {
-        //     firstNameVerification: validarNombreApellido(firstName),
-        //     lastNameVerification: validarNombreApellido(lastName),
-        //     emailVerification: validarEmail(email),
-        //     passwordVerification: validarPassword(password)
-        // }
-
-
         return validarNombreApellido(firstName) && validarNombreApellido(lastName) && validarEmail(email) && validarPassword(password);
     }
 });

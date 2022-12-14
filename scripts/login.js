@@ -1,51 +1,32 @@
-window.addEventListener('load', function () {
-    const form = document.querySelector('form');
+import ajax from "./helpers/ajax.js";
+import API from "./helpers/API.js"
+
+window.addEventListener('load', ()=>{
+
     const inputEmail = document.querySelector('#inputEmail');
     const inputPassword = document.querySelector('#inputPassword');
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', (e)=>{
 
-    form.addEventListener('submit', function (e) {
         e.preventDefault();
-
-        const data = {
-            email: inputEmail.value, 
-            password: inputPassword.value
-        }
-
-        realizarLogin(data);
+        realizarLogin({email:inputEmail.value, password:inputPassword.value});
     })
 
+    function realizarLogin(data) {
 
-    async function realizarLogin(datos) {
+        // const res = await fetchPost({body:data, direccion:'users/login'});
+        ajax({
+            method:'POST',
+            url: API.loginUser,
+            cbSuccess:(res)=>{
 
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json',
+                if (res.jwt) {
+                    localStorage.setItem('jwt', res.jwt);
+                    location.replace('mis-tareas.html');
+                }
             },
-            body: JSON.stringify(datos)
-        }
-
-        try {
-            
-            const res = await fetch('http://todo-api.ctd.academy:3000/v1/users/login', options)
-            const json = await res.json();
-
-            // console.log(res);
-            // console.log(json);
-
-            if (!res.ok) throw {
-                status: res.status,
-                statusText: res.statusText
-            }
-
-            if(json.jwt){
-                localStorage.setItem('jwt', json.jwt);
-                location.replace('mis-tareas.html');
-            }
-
-
-        } catch (err) {
-            console.log(err);
-        }
+            body: data
+        })
     }
-});
+})
